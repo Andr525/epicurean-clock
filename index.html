@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Epicurean House — Time Clock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B1420; --bg-2:#0F1B2D; --panel:#13233A; --panel-2:#182B45;
+  --border:rgba(201,168,76,0.18); --border-strong:rgba(201,168,76,0.4);
+  --gold:#C9A84C; --gold-soft:#B8943F;
+  --text:#F3ECDC; --text-dim:rgba(243,236,220,0.62); --text-faint:rgba(243,236,220,0.38);
+  --green:#5FB48A; --red:#E07A6B;
+  --shadow:0 20px 60px rgba(0,0,0,0.45);
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:
+    radial-gradient(1200px 800px at 80% -10%, rgba(201,168,76,0.10), transparent 60%),
+    radial-gradient(900px 700px at -10% 110%, rgba(95,180,138,0.06), transparent 55%),
+    var(--bg);
+  color:var(--text); min-height:100vh; overflow-x:hidden;
+}
+.serif{font-family:'Cormorant Garamond',Georgia,serif;}
+.hidden{display:none !important;}
+.brandbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 28px;border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg, rgba(19,35,58,0.9), rgba(11,20,32,0.4));
+  backdrop-filter:blur(8px);position:sticky;top:0;z-index:50;
+}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand-mark{
+  width:42px;height:42px;border-radius:50%;border:1.5px solid var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);font-weight:700;
+  background:radial-gradient(circle at 30% 25%, rgba(201,168,76,0.2), transparent 70%);
+}
+.brand-name{font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:.5px;line-height:1;}
+.brand-sub{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-faint);margin-top:3px;}
+.brand-right{display:flex;align-items:center;gap:18px;}
+.clock-display{text-align:right;}
+.clock-time{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--gold);line-height:1;font-variant-numeric:tabular-nums;}
+.clock-date{font-size:11px;color:var(--text-dim);margin-top:2px;}
+.screen{min-height:calc(100vh - 82px);display:flex;align-items:center;justify-content:center;padding:32px;}
+.center-card{
+  width:100%;max-width:520px;background:linear-gradient(180deg,var(--panel),var(--bg-2));
+  border:1px solid var(--border);border-radius:24px;box-shadow:var(--shadow);
+  padding:40px 36px;animation:rise .5s var(--ease-out);
+}
+@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.985);}to{opacity:1;transform:none;}}
+.eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-soft);text-align:center;}
+.title{font-family:'Cormorant Garamond',serif;font-size:34px;text-align:center;margin:10px 0 6px;line-height:1.1;}
+.subtitle{text-align:center;color:var(--text-dim);font-size:14px;margin-bottom:28px;}
+.divider-orn{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0 26px;color:var(--gold);}
+.divider-orn::before,.divider-orn::after{content:"";height:1px;width:60px;background:linear-gradient(90deg,transparent,var(--border-strong));}
+.divider-orn::after{background:linear-gradient(90deg,var(--border-strong),transparent);}
+.pin-dots{display:flex;gap:16px;justify-content:center;margin:6px 0 26px;}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border-strong);transition:all .18s var(--ease-out);}
+.pin-dot.filled{background:var(--gold);border-color:var(--gold);transform:scale(1.05);}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:320px;margin:0 auto;}
+.key{
+  aspect-ratio:1;border-radius:50%;border:1px solid var(--border);background:rgba(24,43,69,0.5);
+  font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:transform .12s var(--ease-out),background .12s var(--ease-out);user-select:none;
+}
+.key:hover{background:rgba(24,43,69,0.95);}
+.key:active{transform:scale(.92);background:var(--gold);color:#1a1306;}
+.key.fn{font-size:15px;font-family:'Inter';letter-spacing:.5px;border-color:transparent;background:transparent;color:var(--text-dim);}
+.key.fn:active{background:rgba(224,122,107,0.2);color:var(--red);transform:scale(.92);}
+.cam-wrap{width:240px;height:240px;border-radius:50%;overflow:hidden;margin:0 auto 16px;border:3px solid var(--border-strong);background:#000;position:relative;}
+.cam-wrap video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);}
+.cam-ring{position:absolute;inset:-3px;border-radius:50%;border:3px solid transparent;}
+.cam-ring.scanning{border-top-color:var(--gold);animation:spin 1s linear infinite;}
+.cam-ring.ok{border-color:var(--green);}
+.cam-ring.bad{border-color:var(--red);}
+@keyframes spin{to{transform:rotate(360deg);}}
+.status-line{text-align:center;font-size:14px;color:var(--text-dim);min-height:22px;margin-bottom:8px;}
+.status-line.ok{color:var(--green);}
+.status-line.bad{color:var(--red);}
+.btn{width:100%;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:600;letter-spacing:.4px;cursor:pointer;transition:transform .16s var(--ease-out),filter .16s var(--ease-out);font-family:'Inter',sans-serif;}
+.btn:active{transform:scale(.97);}
+.btn-gold{background:linear-gradient(180deg,var(--gold),var(--gold-soft));color:#1a1306;}
+.btn-gold:hover{filter:brightness(1.06);}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-dim);}
+.btn-ghost:hover{border-color:var(--border-strong);color:var(--text);}
+.btn-row{display:flex;gap:12px;margin-top:18px;}
+.btn-row .btn{width:auto;flex:1;}
+.role-badge{display:inline-block;padding:4px 14px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:.5px;}
+.mini-note{font-size:12px;color:var(--text-faint);text-align:center;line-height:1.6;margin-top:18px;}
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:10px;z-index:200;align-items:center;}
+.toast-item{display:flex;align-items:center;gap:10px;background:var(--panel-2);border:1px solid var(--border-strong);border-radius:12px;padding:13px 20px;font-size:14px;box-shadow:var(--shadow);animation:rise .3s var(--ease-out);min-width:240px;}
+.toast-item.success{border-color:rgba(95,180,138,0.5);}
+.toast-item.error{border-color:rgba(224,122,107,0.5);}
+@media(max-width:560px){ .center-card{padding:30px 22px;} .title{font-size:28px;} }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="toast"></div>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/dist/face-api.min.js"></script>
+<script>
+/* ============================================================
+   EPICUREAN HOUSE @ THE CHOCOLATE STUDIO
+   TIME CLOCK — standalone (employees only, NO Back of House)
+   Connects to the same Firebase project as the Back of House app.
+   ============================================================ */
+var firebaseConfig = {
+  apiKey: "AIzaSyAvg9x8kmKmZjcu62D2Jb4jpO57ArC657Y",
+  authDomain: "epicurean-house-at-the-choc-st.firebaseapp.com",
+  projectId: "epicurean-house-at-the-choc-st",
+  storageBucket: "epicurean-house-at-the-choc-st.firebasestorage.app",
+  messagingSenderId: "320703681087",
+  appId: "1:320703681087:web:04f7c9a17637388a039e8a"
+};
+var fbApp=null, fbDb=null, fbReady=false;
+try{ fbApp=firebase.initializeApp(firebaseConfig); fbDb=firebase.firestore(); fbReady=true; }
+catch(e){ console.warn('Firebase init failed — local-only mode', e); fbReady=false; }
+</script>
+<script>
+/* ---------------- Data layer (Firebase + local fallback) ---------------- */
+function lsGet(k, fb){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):fb; }catch(e){ return fb; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function fbGetDoc(col, id){
+  if(!fbReady) return Promise.resolve(null);
+  return fbDb.collection(col).doc(id).get().then(function(s){ return s.exists?s.data():null; }).catch(function(e){ console.warn('read fail',e); return null; });
+}
+function fbSetDoc(col, id, data){
+  if(!fbReady) return Promise.resolve(false);
+  return fbDb.collection(col).doc(id).set(data,{merge:true}).then(function(){return true;}).catch(function(e){ console.warn('write fail',e); return false; });
+}
+
+/* ---------------- Role system (first digit of code) ---------------- */
+var ROLES = {
+  '1': {key:'kitchen',     label:'Kitchen',        color:'#E0A36B', pos:false},
+  '2': {key:'sales',       label:'Sales Floor',    color:'#9BC4E2', pos:false},
+  '3': {key:'foodmaster',  label:'Food Master',    color:'#5FB48A', pos:true },
+  '4': {key:'front',       label:'Front of House', color:'#C9A84C', pos:false},
+  '5': {key:'manager',     label:'Manager',        color:'#E07A6B', pos:true }
+};
+function roleFromCode(code){ return ROLES[(code||'')[0]] || {key:'staff', label:'Staff', color:'#C9A84C', pos:false}; }
+
+/* ---------------- Seed staff (codes follow the role system) ---------------- */
+var SEED_STAFF = [
+  {id:'s1', name:'Andre Mendoza', code:'3001', enrolled:false, faceprint:null},
+  {id:'s2', name:'Paco Arias',    code:'3002', enrolled:false, faceprint:null},
+  {id:'s3', name:'Maria Lopez',   code:'1001', enrolled:false, faceprint:null},
+  {id:'s4', name:'Edwin Perez',   code:'4001', enrolled:false, faceprint:null},
+  {id:'s5', name:'General Manager',code:'5001', enrolled:false, faceprint:null}
+];
+
+var STATE = {
+  staff: lsGet('eh_staff', SEED_STAFF.slice()),
+  punches: lsGet('eh_punches', [])
+};
+
+function saveStaff(){ lsSet('eh_staff', STATE.staff); fbSetDoc('boh_shared','staff_clock',{list:STATE.staff, updatedAt:Date.now()}); }
+function savePunches(){ lsSet('eh_punches', STATE.punches); fbSetDoc('boh_shared','punches',{list:STATE.punches.slice(-800), updatedAt:Date.now()}); }
+
+function syncFromCloud(){
+  if(!fbReady) return Promise.resolve();
+  return Promise.all([
+    fbGetDoc('boh_shared','staff_clock').then(function(d){ if(d&&d.list&&d.list.length){ STATE.staff=d.list; lsSet('eh_staff',STATE.staff); } }),
+    fbGetDoc('boh_shared','punches').then(function(d){ if(d&&d.list){ STATE.punches=d.list; lsSet('eh_punches',STATE.punches); } })
+  ]).catch(function(){});
+}
+
+/* ---------------- DOM helpers ---------------- */
+var $=function(id){ return document.getElementById(id); };
+function el(tag,attrs,html){ var n=document.createElement(tag); if(attrs)for(var k in attrs){ if(k==='class')n.className=attrs[k]; else n.setAttribute(k,attrs[k]); } if(html!=null)n.innerHTML=html; return n; }
+function toast(msg,type){ var c=$('toast'); var t=el('div',{class:'toast-item '+(type||'')},'<span>'+(type==='success'?'✓':type==='error'?'✕':'ℹ')+'</span><span>'+msg+'</span>'); c.appendChild(t); setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateY(8px)'; setTimeout(function(){t.remove();},250); },2600); }
+
+/* ---------------- Brand bar + live clock ---------------- */
+function brandBar(){
+  return '<div class="brandbar"><div class="brand"><div class="brand-mark">E</div><div>'+
+    '<div class="brand-name">Epicurean House <span style="color:var(--gold);font-size:16px">@ The Chocolate Studio</span></div>'+
+    '<div class="brand-sub">Time Clock</div></div></div>'+
+    '<div class="brand-right"><div class="clock-display"><div class="clock-time" id="live-clock">--:--:--</div><div class="clock-date" id="live-date">&nbsp;</div></div></div></div>';
+}
+var _clockTimer=null;
+function startLiveClock(){
+  function tick(){ var n=new Date(); var c=$('live-clock'),d=$('live-date');
+    if(c)c.textContent=n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    if(d)d.textContent=n.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}); }
+  if(_clockTimer)clearInterval(_clockTimer); tick(); _clockTimer=setInterval(tick,1000);
+}
+
+/* ============================================================
+   CLOCK FLOW
+   ============================================================ */
+var CLOCK={ step:'code', pin:'', staff:null, stream:null, modelsLoaded:false, busy:false };
+var FACE_MATCH_THRESHOLD=0.50;
+
+function render(){ $('root').innerHTML=brandBar()+'<div class="screen"><div class="center-card" id="clock-card">'+clockInner()+'</div></div>'; startLiveClock(); bindClock(); }
+function clockInner(){ if(CLOCK.step==='face')return clockFaceStep(); if(CLOCK.step==='result')return CLOCK.resultHTML||''; return clockCodeStep(); }
+
+function clockCodeStep(){
+  var dots=''; for(var i=0;i<4;i++){ dots+='<div class="pin-dot'+(i<CLOCK.pin.length?' filled':'')+'"></div>'; }
+  var keys=['1','2','3','4','5','6','7','8','9'], keyHTML='';
+  keys.forEach(function(k){ keyHTML+='<div class="key" data-k="'+k+'">'+k+'</div>'; });
+  keyHTML+='<div class="key fn" data-k="clear">Clear</div><div class="key" data-k="0">0</div><div class="key fn" data-k="back">&#9003;</div>';
+  return '<div class="eyebrow">Time Clock</div><div class="title serif">Enter Your Code</div>'+
+    '<div class="subtitle">Type your 4-digit staff code to clock in or out</div>'+
+    '<div class="pin-dots">'+dots+'</div><div class="keypad">'+keyHTML+'</div>';
+}
+
+function clockFaceStep(){
+  var role=roleFromCode(CLOCK.staff.code);
+  return '<div class="eyebrow">Identity Check</div><div class="title serif">'+CLOCK.staff.name+'</div>'+
+    '<div style="text-align:center;margin:-2px 0 18px"><span class="role-badge" style="background:'+role.color+'22;color:'+role.color+'">'+role.label+'</span></div>'+
+    '<div class="subtitle" style="margin-bottom:18px">'+(CLOCK.staff.enrolled?'Look at the camera to verify it is you':'First time — we will register your face')+'</div>'+
+    '<div class="cam-wrap"><div class="cam-ring" id="cam-ring"></div><video id="cam-video" autoplay muted playsinline></video></div>'+
+    '<div class="status-line" id="face-status">Starting camera&hellip;</div>'+
+    '<div class="btn-row"><button class="btn btn-ghost" onclick="clockCancel()">Cancel</button>'+
+    '<button class="btn btn-gold" id="face-action" disabled>'+(CLOCK.staff.enrolled?'Verify &amp; Clock':'Register Face')+'</button></div>'+
+    '<div class="mini-note">A photo of this punch is saved for the manager&rsquo;s records.</div>';
+}
+
+function bindClock(){
+  if(CLOCK.step==='code'){
+    var card=$('clock-card');
+    card.querySelectorAll('.key').forEach(function(key){
+      key.addEventListener('click',function(){
+        var k=key.getAttribute('data-k');
+        if(k==='clear')CLOCK.pin=''; else if(k==='back')CLOCK.pin=CLOCK.pin.slice(0,-1); else if(CLOCK.pin.length<4)CLOCK.pin+=k;
+        $('clock-card').innerHTML=clockCodeStep(); bindClock();
+        if(CLOCK.pin.length===4) setTimeout(submitClockCode,150);
+      });
+    });
+  } else if(CLOCK.step==='face'){ startFaceFlow(); }
+}
+
+function submitClockCode(){
+  var match=STATE.staff.filter(function(s){ return s.code===CLOCK.pin; })[0];
+  if(!match){ toast('Code not recognized','error'); CLOCK.pin=''; $('clock-card').innerHTML=clockCodeStep(); bindClock(); return; }
+  CLOCK.staff=match; CLOCK.step='face'; $('clock-card').innerHTML=clockFaceStep(); bindClock();
+}
+function clockCancel(){ stopCam(); CLOCK.pin=''; CLOCK.staff=null; CLOCK.step='code'; $('clock-card').innerHTML=clockCodeStep(); bindClock(); }
+function stopCam(){ if(CLOCK.stream){ CLOCK.stream.getTracks().forEach(function(t){t.stop();}); CLOCK.stream=null; } }
+
+function loadFaceModels(){
+  if(CLOCK.modelsLoaded)return Promise.resolve(true);
+  if(typeof faceapi==='undefined')return Promise.reject(new Error('face library not loaded'));
+  var URL='https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model';
+  return Promise.all([
+    faceapi.nets.tinyFaceDetector.loadFromUri(URL),
+    faceapi.nets.faceLandmark68Net.loadFromUri(URL),
+    faceapi.nets.faceRecognitionNet.loadFromUri(URL)
+  ]).then(function(){ CLOCK.modelsLoaded=true; return true; });
+}
+function setFaceStatus(msg,cls){ var s=$('face-status'); if(s){ s.textContent=msg; s.className='status-line'+(cls?(' '+cls):''); } var r=$('cam-ring'); if(r){ r.className='cam-ring'+(cls==='ok'?' ok':cls==='bad'?' bad':''); } }
+
+function startFaceFlow(){
+  setFaceStatus('Loading face engine\u2026');
+  loadFaceModels().then(function(){ return navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false}); })
+  .then(function(stream){
+    CLOCK.stream=stream; var v=$('cam-video'); if(!v)return; v.srcObject=stream;
+    setFaceStatus(CLOCK.staff.enrolled?'Center your face, then tap Verify':'Center your face, then tap Register');
+    var btn=$('face-action'); if(btn){ btn.disabled=false; btn.onclick=CLOCK.staff.enrolled?doVerify:doEnroll; }
+  }).catch(function(err){
+    console.warn(err);
+    if(err&&err.name==='NotAllowedError')setFaceStatus('Camera blocked. Allow camera access for this site.','bad');
+    else if(err&&(''+err.message).indexOf('face library')>-1)setFaceStatus('Face engine unavailable — check internet.','bad');
+    else setFaceStatus('Camera unavailable on this device.','bad');
+  });
+}
+function captureDescriptor(){
+  var v=$('cam-video'); if(!v)return Promise.resolve(null);
+  var opts=new faceapi.TinyFaceDetectorOptions({inputSize:320,scoreThreshold:0.5});
+  return faceapi.detectSingleFace(v,opts).withFaceLandmarks().withFaceDescriptor().then(function(res){ return res?Array.from(res.descriptor):null; });
+}
+function doEnroll(){
+  if(CLOCK.busy)return; CLOCK.busy=true; var btn=$('face-action'); if(btn)btn.disabled=true;
+  setFaceStatus('Registering your face\u2026',null); var ring=$('cam-ring'); if(ring)ring.className='cam-ring scanning';
+  captureDescriptor().then(function(desc){
+    if(!desc){ setFaceStatus('No face detected. Try again.','bad'); CLOCK.busy=false; if(btn)btn.disabled=false; return; }
+    var idx=STATE.staff.findIndex(function(s){return s.id===CLOCK.staff.id;});
+    if(idx>-1){ STATE.staff[idx].faceprint=desc; STATE.staff[idx].enrolled=true; CLOCK.staff=STATE.staff[idx]; }
+    saveStaff(); setFaceStatus('Face registered \u2713','ok');
+    setTimeout(function(){ recordPunch(CLOCK.staff,1.0,'enroll'); },600);
+  }).catch(function(e){ console.warn(e); setFaceStatus('Something went wrong. Try again.','bad'); CLOCK.busy=false; if(btn)btn.disabled=false; });
+}
+function doVerify(){
+  if(CLOCK.busy)return; CLOCK.busy=true; var btn=$('face-action'); if(btn)btn.disabled=true;
+  setFaceStatus('Verifying\u2026',null); var ring=$('cam-ring'); if(ring)ring.className='cam-ring scanning';
+  captureDescriptor().then(function(desc){
+    if(!desc){ setFaceStatus('No face detected. Try again.','bad'); CLOCK.busy=false; if(btn)btn.disabled=false; return; }
+    var stored=CLOCK.staff.faceprint;
+    if(!stored){ var idx=STATE.staff.findIndex(function(s){return s.id===CLOCK.staff.id;}); if(idx>-1){STATE.staff[idx].faceprint=desc;STATE.staff[idx].enrolled=true;} saveStaff(); setTimeout(function(){recordPunch(CLOCK.staff,1.0,'enroll');},500); return; }
+    var dist=faceapi.euclideanDistance(desc,stored); var score=Math.max(0,1-dist);
+    if(dist<=FACE_MATCH_THRESHOLD){ setFaceStatus('Verified \u2713 ('+Math.round(score*100)+'% match)','ok'); setTimeout(function(){ recordPunch(CLOCK.staff,score,'face'); },600); }
+    else { setFaceStatus('Face does not match this code. Punch denied.','bad'); CLOCK.busy=false; if(btn)btn.disabled=false; logFailedAttempt(CLOCK.staff,score); }
+  }).catch(function(e){ console.warn(e); setFaceStatus('Something went wrong. Try again.','bad'); CLOCK.busy=false; if(btn)btn.disabled=false; });
+}
+function lastPunchType(staffId){ for(var i=STATE.punches.length-1;i>=0;i--){ if(STATE.punches[i].staffId===staffId&&(STATE.punches[i].type==='in'||STATE.punches[i].type==='out'))return STATE.punches[i].type; } return null; }
+function recordPunch(staff,score,method){
+  var last=lastPunchType(staff.id); var type=(last==='in')?'out':'in'; var role=roleFromCode(staff.code);
+  var p={id:'p'+Date.now(),staffId:staff.id,name:staff.name,role:role.label,roleKey:role.key,type:type,ts:Date.now(),matchScore:Math.round(score*100),method:method};
+  STATE.punches.push(p); savePunches(); stopCam(); CLOCK.busy=false; CLOCK.step='result';
+  CLOCK.resultHTML=clockResult(staff,type,score); $('clock-card').innerHTML=CLOCK.resultHTML;
+  setTimeout(function(){ CLOCK.pin=''; CLOCK.staff=null; CLOCK.step='code'; var c=$('clock-card'); if(c){ c.innerHTML=clockCodeStep(); bindClock(); } },4500);
+}
+function logFailedAttempt(staff,score){ var role=roleFromCode(staff.code); STATE.punches.push({id:'f'+Date.now(),staffId:staff.id,name:staff.name,role:role.label,roleKey:role.key,type:'denied',ts:Date.now(),matchScore:Math.round(score*100),method:'face-fail'}); savePunches(); }
+function clockResult(staff,type,score){
+  var role=roleFromCode(staff.code); var inOut=type==='in'?'Clocked In':'Clocked Out'; var color=type==='in'?'var(--green)':'var(--gold)';
+  return '<div style="text-align:center;padding:10px 0"><div style="font-size:54px;margin-bottom:10px;color:'+color+'">'+(type==='in'?'\u2714':'\u23FB')+'</div>'+
+    '<div class="eyebrow">'+inOut+'</div><div class="title serif" style="margin-top:6px">'+staff.name+'</div>'+
+    '<div style="margin:2px 0 6px"><span class="role-badge" style="background:'+role.color+'22;color:'+role.color+'">'+role.label+'</span></div>'+
+    '<div class="subtitle">'+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+'</div>'+
+    '<div class="divider-orn">&#10070;</div>'+
+    '<div style="font-size:13px;color:var(--text-dim)">Identity confirmed at '+Math.round(score*100)+'% match.</div>'+
+    '<button class="btn btn-gold" style="margin-top:22px" onclick="clockCancel()">Done</button></div>';
+}
+
+/* ---------------- BOOT ---------------- */
+function boot(){ render(); syncFromCloud().then(function(){ if(CLOCK.step==='code'){ var c=$('clock-card'); if(c){ c.innerHTML=clockCodeStep(); bindClock(); } } }); }
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot); else boot();
+</script>
+</body>
+</html>
